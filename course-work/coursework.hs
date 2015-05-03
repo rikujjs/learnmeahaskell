@@ -20,7 +20,7 @@ wordCounter = do
     if command == "first"
       then print $ distanceMax (fileParser file1) (fileParser file2)
       else if command == "second"
-        then print $ distanceMin (fileParser file1) (fileParser file2)
+        then threeTuplePrinter $ minimumFilter (fileParser file1) (fileParser file2)
         else if command == "third"
           then putStrLn "third"
           else
@@ -43,7 +43,6 @@ handler e
     | isDoesNotExistError e = putStrLn "The input file doesn't exist!"
     | otherwise = ioError e
 
-
 distanceMax :: [[String]] -> [[String]] -> Int
 distanceMax xs ys = sum [sentenceDist xss yss | xss <- xs, yss <- ys]
 
@@ -59,6 +58,12 @@ minSum xs ys = minimum $ map (\x -> tupleSum x) (candidateSents xs ys)
 -- Returns the first (in order) solution that has the minimum sum of differences!
 minimumFilter :: [[String]] -> [[String]] -> [(Int, String, String)]
 minimumFilter xs ys = head (dropWhile (\x -> (tupleSum x) > (minSum xs ys)) (candidateSents xs ys))
+
+tupleToString :: (Int, String, String) -> String
+tupleToString (a, b, c) = b ++ " & " ++ c 
+
+threeTuplePrinter :: [(Int, String, String)] -> IO ()
+threeTuplePrinter tupleList = putStrLn . unlines . map tupleToString $ tupleList
 
 candidateSents :: [[String]] -> [[String]] -> [[(Int, String, String)]]
 candidateSents xs ys = [[(sentenceDist xss (ys !! a), unwords xss, unwords (ys !! a)) | xss <- xs] | a <- [0..(length ys - 1)]]
